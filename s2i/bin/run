@@ -90,7 +90,14 @@ for varname in ${!TF_NEED_*}; do
         FINAL_STR+=$WORD"+"
     fi
 done
-TENSORFLOW_BUILD_DIR_NAME=$OSVER/${TF_GIT_BRANCH//r}/${FINAL_STR::-1}
+if [ $TF_NEED_CUDA = "1" ]; then
+	_TAG="gpu"
+elif [ $TF_NEED_MKL = "1" ]; then
+	_TAG="mkl"
+else
+	_TAG="cpu"
+fi
+TENSORFLOW_BUILD_DIR_NAME=$OSVER/${TF_GIT_BRANCH//r}/${_TAG}/$NB_PYTHON_VER/${FINAL_STR::-1}
 
 pip list 2>&1 | grep "YAML\|proto\|numpy"
 #PYTHON_LIB_PATH="$($PYTHON_BIN_PATH -c 'import sys;for pth in sys.path: print pth)')"
