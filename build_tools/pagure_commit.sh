@@ -55,31 +55,32 @@ UPDATE_INDEX_HTML(){
 
 
 PUSH_DATA(){
-	for f in $FILES;do
-		echo "FILE="$f
-		cp $f $TENSORFLOW_BUILD_DIR_NAME/
-	done
 	git status
 	echo "=============================="
-	CHECK_LOCAL_AND_UPSTREAM
-	UPDATE_INDEX_HTML
-	git add $TENSORFLOW_BUILD_DIR_NAME && git add index.html
+	cp ../$WHFLL $TENSORFLOW_BUILD_DIR_NAME/
+	git add $TENSORFLOW_BUILD_DIR_NAME
 	git status
 	echo "=============================="
 	git commit -m "$GIT_COMMIT_MSG"
 	git status
 	echo "=============================="
-	git push origin $BRANCH || {
+	until git push origin $BRANCH; do
 		git pull --rebase origin $BRANCH
-		git push origin $BRANCH
-	}
+	done
 }
 
-# NOTE: Logging will be intergated.
 if [ ! -d "$TENSORFLOW_BUILD_DIR_NAME" ]; then
 	mkdir -p "$TENSORFLOW_BUILD_DIR_NAME"
+	UPDATE_INDEX_HTML
+	git add index.html
 	PUSH_DATA
-else
+elif [ -d "$TENSORFLOW_BUILD_DIR_NAME" && ! -f "$TENSORFLOW_BUILD_DIR_NAME/$WHFLL" ]
+	echo 'OS version exists - new python version'
+	UPDATE_INDEX_HTML
+	git add index.html
+	PUSH_DATA
+else 
 	echo 'OS version exists - adding updated files'
+	COPY_FILES
 	PUSH_DATA
 fi
